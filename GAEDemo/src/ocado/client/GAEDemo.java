@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import com.google.gwt.core.client.EntryPoint;
+import com.google.gwt.core.client.GWT;
 import com.google.gwt.event.dom.client.ClickEvent;
 import com.google.gwt.event.dom.client.ClickHandler;
 import com.google.gwt.event.dom.client.KeyCodes;
@@ -14,6 +15,8 @@ import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Random;
 import com.google.gwt.user.client.Timer;
 import com.google.gwt.user.client.Window;
+import com.google.gwt.user.client.rpc.AsyncCallback;
+import com.google.gwt.user.client.ui.Anchor;
 import com.google.gwt.user.client.ui.Button;
 import com.google.gwt.user.client.ui.FlexTable;
 import com.google.gwt.user.client.ui.HorizontalPanel;
@@ -27,8 +30,10 @@ import com.google.gwt.user.client.ui.VerticalPanel;
  */
 public class GAEDemo implements EntryPoint {
 
+	// Constants
 	private static final int REFRESH_INTERVAL = 5000; // ms
 
+	// UI Components
 	private final VerticalPanel mainPanel = new VerticalPanel();
 	private final FlexTable stocksFlexTable = new FlexTable();
 	private final HorizontalPanel addPanel = new HorizontalPanel();
@@ -37,9 +42,49 @@ public class GAEDemo implements EntryPoint {
 	private final Label lastUpdatedLabel = new Label();
 	private final ArrayList<String> stocks = new ArrayList<String>();
 
+	//User Login components
+	private LoginInfo loginInfo = null;
+	private final VerticalPanel loginPanel = new VerticalPanel();
+	private final Label loginLabel = new Label("Please sign in to your Google Account to access the stockwatcher application.");
+	private final Anchor signInLink = new Anchor("Sign In");
+	private final Anchor signOutLink = new Anchor("Sign Out");
+
 	/**  * Entry point method.  */
 	@Override
-	public void onModuleLoad() { 
+	public void onModuleLoad() {
+		// Check login status using login service.
+		LoginServiceAsync loginService = GWT.create(LoginService.class);
+		loginService.login(GWT.getHostPageBaseURL(), new AsyncCallback<LoginInfo>() {
+
+			@Override
+			public void onSuccess(LoginInfo result) {
+				loginInfo = result;
+				if (loginInfo.isLoggedIn()) {
+					loadStockWatcher();
+				} else {
+					loadLogin();
+				}
+			}
+
+			//Do nothing atm
+			@Override
+			public void onFailure(Throwable caught) {
+			}
+		});
+
+	}
+
+	private void loadLogin() {
+		// Assemble login panel.
+		signInLink.setHref(loginInfo.getLoginUrl());
+		loginPanel.add(loginLabel);
+		loginPanel.add(signInLink);
+		RootPanel.get("stockList").add(loginPanel);
+	}
+
+	private void loadStockWatcher() {
+		// Set up sign out hyperlink.
+		signOutLink.setHref(loginInfo.getLogoutUrl());
 
 		// Create table for stock data.  
 		stocksFlexTable.setText(0, 0, "Symbol");
@@ -52,6 +97,7 @@ public class GAEDemo implements EntryPoint {
 		addPanel.add(addStockButton);
 
 		// Assemble Main panel.
+		mainPanel.add(signOutLink);
 		mainPanel.add(stocksFlexTable);
 		mainPanel.add(addPanel);
 		mainPanel.add(lastUpdatedLabel);

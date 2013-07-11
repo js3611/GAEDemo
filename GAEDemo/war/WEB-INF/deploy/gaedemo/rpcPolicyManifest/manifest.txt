@@ -1,2 +1,3 @@
 # Module gaedemo
 # RPC service class, partial path of RPC policy file
+ocado.client.LoginService, 1211324F486143F212643EBAFCC1CB29.gwt.rpc

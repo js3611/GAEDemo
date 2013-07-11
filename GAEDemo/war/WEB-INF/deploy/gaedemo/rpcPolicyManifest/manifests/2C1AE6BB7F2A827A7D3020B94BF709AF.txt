@@ -1,2 +1,0 @@
-serviceClass: ocado.client.GreetingService
-path: B34A0CD682CC57BF66D66B563753B853.gwt.rpc

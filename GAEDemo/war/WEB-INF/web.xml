@@ -5,7 +5,22 @@
          version="2.5"
          xmlns="http://java.sun.com/xml/ns/javaee">
 
+	  <!-- Default page to serve -->
+  <welcome-file-list>
+    <welcome-file>GAEDemo.html</welcome-file>
+  </welcome-file-list>
+	
   <!-- Servlets -->
+  <servlet>
+  	<servlet-name>loginService</servlet-name>
+  	<servlet-class>ocado.server.LoginServiceImpl</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>loginService</servlet-name>
+  	<url-pattern>/gaedemo/login</url-pattern>
+  </servlet-mapping>
+  
+  <!-- Unnecessary -->
   <servlet>
     <servlet-name>greetServlet</servlet-name>
     <servlet-class>ocado.server.GreetingServiceImpl</servlet-class>
@@ -16,9 +31,5 @@
     <url-pattern>/gaedemo/greet</url-pattern>
   </servlet-mapping>
   
-  <!-- Default page to serve -->
-  <welcome-file-list>
-    <welcome-file>GAEDemo.html</welcome-file>
-  </welcome-file-list>
 
 </web-app>
