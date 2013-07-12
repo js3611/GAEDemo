@@ -20,6 +20,16 @@
   	<url-pattern>/gaedemo/login</url-pattern>
   </servlet-mapping>
   
+  
+  <servlet>
+  	<servlet-name>stockService</servlet-name>
+  	<servlet-class>ocado.server.StockServiceImpl</servlet-class>
+  </servlet>
+  <servlet-mapping>
+  	<servlet-name>stockService</servlet-name>
+  	<url-pattern>/gaedemo/stock</url-pattern>
+  </servlet-mapping>
+  
   <!-- Unnecessary -->
   <servlet>
     <servlet-name>greetServlet</servlet-name>

@@ -48,6 +48,7 @@ public class GAEDemo implements EntryPoint {
 	private final Label loginLabel = new Label("Please sign in to your Google Account to access the stockwatcher application.");
 	private final Anchor signInLink = new Anchor("Sign In");
 	private final Anchor signOutLink = new Anchor("Sign Out");
+	private final StockServiceAsync stockService = GWT.create(StockService.class);
 
 	/**  * Entry point method.  */
 	@Override
@@ -69,6 +70,7 @@ public class GAEDemo implements EntryPoint {
 			//Do nothing atm
 			@Override
 			public void onFailure(Throwable caught) {
+				handleError(caught);
 			}
 		});
 
@@ -91,6 +93,8 @@ public class GAEDemo implements EntryPoint {
 		stocksFlexTable.setText(0, 1, "Price");
 		stocksFlexTable.setText(0, 2, "Change");
 		stocksFlexTable.setText(0, 3, "Remove");
+
+		loadStocks();
 
 		// Assemble Add Stock panel.
 		addPanel.add(newSymbolTextBox);
@@ -136,6 +140,24 @@ public class GAEDemo implements EntryPoint {
 		});
 	}
 
+	private void loadStocks() {
+		stockService.getStocks(new AsyncCallback<String[]>() {
+			@Override
+			public void onFailure(Throwable error) {
+				handleError(error);
+			}
+			@Override
+			public void onSuccess(String[] symbols) {
+				displayStocks(symbols);
+			}
+		});
+	}
+	private void displayStocks(String[] symbols) {
+		for (String symbol : symbols) {
+			displayStock(symbol);
+		}
+	}
+
 	private void addStock() {
 		final String symbol = newSymbolTextBox.getText().toUpperCase().trim();
 		newSymbolTextBox.setFocus(true);
@@ -154,6 +176,24 @@ public class GAEDemo implements EntryPoint {
 			return;
 		}
 
+		addStock(symbol);
+
+	}
+
+	private void addStock(final String symbol) {
+		stockService.addStock(symbol, new AsyncCallback<Void>() {
+			@Override
+			public void onFailure(Throwable error) {
+				handleError(error);
+			}
+			@Override
+			public void onSuccess(Void ignore) {
+				displayStock(symbol);
+			}
+		});
+	}
+
+	private void displayStock(final String symbol) {
 		// Add the stock to the table.
 		int row = stocksFlexTable.getRowCount();
 		stocks.add(symbol);
@@ -164,16 +204,32 @@ public class GAEDemo implements EntryPoint {
 		removeStockButton.addClickHandler(new ClickHandler() {
 			@Override
 			public void onClick(final ClickEvent event) {
-				int removedIndex = stocks.indexOf(symbol);
-				stocks.remove(removedIndex);
-				stocksFlexTable.removeRow(removedIndex + 1);
+				removeStock(symbol);
 			}
 		});
 		stocksFlexTable.setWidget(row, 3, removeStockButton);
 
 		// Get the stock price.
 		refreshWatchList();
+	}
 
+	private void removeStock(final String symbol) {
+		stockService.removeStock(symbol, new AsyncCallback<Void>() {
+			@Override
+			public void onFailure(Throwable error) {
+				handleError(error);
+			}
+			@Override
+			public void onSuccess(Void ignore) {
+				undisplayStock(symbol);
+			}
+		});
+	}
+
+	private void undisplayStock(final String symbol) {
+		int removedIndex = stocks.indexOf(symbol);
+		stocks.remove(removedIndex);
+		stocksFlexTable.removeRow(removedIndex + 1);
 	}
 
 	/**
@@ -234,6 +290,13 @@ public class GAEDemo implements EntryPoint {
 		stocksFlexTable.setText(row, 1, priceText);
 		stocksFlexTable.setText(row, 2, changeText + " (" + changePercentText
 				+ "%)");
+	}
+
+	private void handleError(Throwable error) {
+		Window.alert(error.getMessage());
+		if (error instanceof NotLoggedInException) {
+			Window.Location.replace(loginInfo.getLogoutUrl());
+		}
 	}
 
 }

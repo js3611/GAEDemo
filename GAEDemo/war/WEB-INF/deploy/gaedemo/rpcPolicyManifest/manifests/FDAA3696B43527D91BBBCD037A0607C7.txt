@@ -1,0 +1,2 @@
+serviceClass: ocado.client.StockService
+path: 6C0DBA4119EE3AF46C9E5CF4A2EE0969.gwt.rpc
